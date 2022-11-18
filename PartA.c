@@ -32,6 +32,7 @@ int main()
   return 0;
 }
 
+// To handle the menu navigation
 void navigate()
 {
   int optionSelected = 0;
@@ -69,6 +70,7 @@ void navigate()
   }
 }
 
+// Displaying main menu
 int mainMenu()
 {
   printf("\n======================Main Menu=================\n");
@@ -85,6 +87,7 @@ int mainMenu()
   return selected;
 }
 
+// Create entry menu
 void createStudentRecord()
 {
   Marks markEntry;
@@ -107,12 +110,13 @@ void createStudentRecord()
   navigate();
 }
 
+// Update entry menu
 void updateMenu()
 {
   Marks updateEntry;
 
   printf("\n====================Update Mark===================\n");
-  printf("Enter index number of student: ");
+  printf("Enter student index number: ");
   scanf("%s", updateEntry.student_index);
   printf("Enter updated assignment 1 marks: ");
   scanf("%f", &updateEntry.assgnmt01_marks);
@@ -128,6 +132,7 @@ void updateMenu()
   navigate();
 }
 
+// Delete mark menu
 void deleteMenu()
 {
   char index[12];
@@ -141,6 +146,7 @@ void deleteMenu()
   navigate();
 }
 
+// Writing to file
 void addToFile(Marks mark)
 {
   FILE *filePointer;
@@ -165,11 +171,14 @@ void addToFile(Marks mark)
   fclose(filePointer);
 }
 
+// Update a file
 void updateFile(Marks updatedMark)
 {
+  // File pointers to data file and a copy of that file
   FILE *file, *copy;
   Marks mark;
 
+  // Opening file to read
   file = fopen(filePath, "r+");
   if (file == NULL)
   {
@@ -178,6 +187,7 @@ void updateFile(Marks updatedMark)
     exit(1);
   }
 
+  // Opening copy file to write
   copy = fopen(tempFilePath, "a+");
   if (file == NULL)
   {
@@ -186,6 +196,7 @@ void updateFile(Marks updatedMark)
     exit(1);
   }
 
+  // Copying to temp file with updated data
   while (fread(&mark, sizeof(Marks), 1, file))
   {
     if (strcmp(mark.student_index, updatedMark.student_index) == 0)
@@ -220,6 +231,7 @@ void updateFile(Marks updatedMark)
     exit(1);
   }
 
+  // Writing back to main file
   while (fread(&mark, sizeof(Marks), 1, copy))
   {
     int write_ret = fwrite(&mark, sizeof(Marks), 1, file);
@@ -237,9 +249,11 @@ void updateFile(Marks updatedMark)
 
 void deleteMark(char index[12])
 {
+  // File pointers to data file and a copy of that file
   FILE *file, *copy;
   Marks mark;
 
+  // Opening file to read
   file = fopen(filePath, "r+");
   if (file == NULL)
   {
@@ -248,6 +262,7 @@ void deleteMark(char index[12])
     exit(1);
   }
 
+  // Opening copy file to write
   copy = fopen(tempFilePath, "a+");
   if (file == NULL)
   {
@@ -256,6 +271,7 @@ void deleteMark(char index[12])
     exit(1);
   }
 
+  // Copying to temp file without deleting entry
   while (fread(&mark, sizeof(Marks), 1, file))
   {
     if (strcmp(mark.student_index, index) != 0)
@@ -280,6 +296,7 @@ void deleteMark(char index[12])
     exit(1);
   }
 
+  // Copying back to main file
   while (fread(&mark, sizeof(Marks), 1, copy))
   {
     int write_ret = fwrite(&mark, sizeof(Marks), 1, file);

@@ -26,6 +26,7 @@ int main()
   pid_t c1, c2, cc1, cc2;
   int belowTwntyFive = 0;
 
+  // Reading data from file to analyze
   FILE *file = fopen(filePath, "r");
 
   if (file == NULL)
@@ -44,27 +45,35 @@ int main()
 
       if (totalMarks[i] < 25)
       {
-        belowTwntyFive;
+        belowTwntyFive++;
       }
     }
   }
 
+  // Initial fork
   c1 = fork();
 
   switch (c1)
   {
   // error
   case -1:
+    perror("Parent fork error: ");
+    printf("Error No: %d\n", errno);
+    exit(0);
     break;
 
   // C1 and CC1
   case 0:
+    // Creating child of first child
     cc1 = fork();
 
     switch (cc1)
     {
     // error
     case -1:
+      perror("C1 fork error: ");
+      printf("Error No: %d\n", errno);
+      exit(0);
       break;
 
     // CC1
@@ -142,6 +151,9 @@ int main()
     {
     // error
     case -1:
+      perror("C2 fork error: ");
+      printf("Error No: %d\n", errno);
+      exit(0);
       break;
 
     // C2 and CC2
