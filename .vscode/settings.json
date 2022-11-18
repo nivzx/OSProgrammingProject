@@ -2,6 +2,7 @@
   "files.associations": {
     "displaymenu.h": "c",
     "marks.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "unistd.h": "c"
   }
 }

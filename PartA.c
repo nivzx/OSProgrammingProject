@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include "student.h"
+#include "paths.h"
 
 int mainMenu();
 void createStudentRecord();
@@ -21,10 +22,6 @@ void deleteMark(char regNo[12]);
 Marks *createMarks(char (*index)[12], float a1, float a2, float project, float exam);
 
 int addedStudents = 0;
-
-char filePath[] = "./data/marks.dat";
-char tempFilePath[] = "./data/copy.dat";
-char dummyFilePath[] = "./Files/dummyMarks.dat";
 
 int main()
 {
