@@ -6,31 +6,23 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-
-typedef struct student_marks
-{
-  char (*student_index)[12];
-  float assgnmt01_marks;
-  float assgnmt02_marks;
-  float project_marks;
-  float finalExam_marks;
-} Marks;
+#include "student.h"
 
 int mainMenu();
-void addMenu();
+void createStudentRecord();
 void updateMenu();
 void deleteMenu();
 void navigate();
-void addToFile(Marks *mark);
-void updateFile(Marks *mark);
+void addToFile(Marks mark);
+void updateFile(Marks mark);
 void deleteMark(char regNo[12]);
 
 Marks *createMarks(char (*index)[12], float a1, float a2, float project, float exam);
 
 int addedStudents = 0;
 
-char filePath[] = "./Files/marks.txt";
-char dummyFilePath[] = "./Files/dummyMarks.txt";
+char filePath[] = "./data/marks.dat";
+char dummyFilePath[] = "./Files/dummyMarks.dat";
 
 int main()
 {
@@ -52,7 +44,7 @@ void navigate()
     switch (selection)
     {
     case 1:
-      addMenu();
+      createStudentRecord();
       optionSelected = 1;
       break;
 
@@ -88,51 +80,43 @@ int mainMenu()
   return selected;
 }
 
-void addMenu()
+void createStudentRecord()
 {
-  char index[12];
-  float a1, a2, proj, exam;
+  Marks markEntry;
 
   printf("\n====================Add Mark===================\n");
   printf("Number of students added = %d/100\n", addedStudents);
 
   printf("Enter index number: ");
-  scanf("%s", index);
+  scanf("%s", markEntry.student_index);
   printf("Enter assignment 1 marks: ");
-  scanf("%f", &a1);
+  scanf("%f", &markEntry.assgnmt01_marks);
   printf("Enter assignment 2 marks: ");
-  scanf("%f", &a2);
+  scanf("%f", &markEntry.assgnmt02_marks);
   printf("Enter assignment project marks: ");
-  scanf("%f", &proj);
+  scanf("%f", &markEntry.project_marks);
   printf("Enter final exam marks: ");
-  scanf("%f", &exam);
+  scanf("%f", &markEntry.finalExam_marks);
 
-  Marks *newMark = createMarks(index, a1, a2, proj, exam);
-
-  addToFile(newMark);
+  addToFile(markEntry);
   navigate();
 }
 
 void updateMenu()
 {
-  char index[12];
-  float a1, a2, proj, exam;
+  Marks updateEntry;
 
   printf("\n====================Update Mark===================\n");
   printf("Enter index number of student: ");
-  scanf("%s", index);
+  scanf("%s", updateEntry.student_index);
   printf("Enter updated assignment 1 marks: ");
-  scanf("%f", &a1);
+  scanf("%f", &updateEntry.assgnmt01_marks);
   printf("Enter updated assignment 2 marks: ");
-  scanf("%f", &a2);
+  scanf("%f", &updateEntry.assgnmt02_marks);
   printf("Enter updated assignment project marks: ");
-  scanf("%f", &proj);
+  scanf("%f", &updateEntry.project_marks);
   printf("Enter updated final exam marks: ");
-  scanf("%f", &exam);
-
-  Marks *updatedMark = createMarks(index, a1, a2, proj, exam);
-
-  updateFile(updatedMark);
+  scanf("%f", &updateEntry.finalExam_marks);
 }
 
 void deleteMenu()
@@ -146,121 +130,34 @@ void deleteMenu()
   deleteMark(index);
 }
 
-void addToFile(Marks *mark)
+void addToFile(Marks mark)
 {
-  FILE *fd = fopen(filePath, "a");
+  FILE *filePointer;
 
-  if (fd == NULL)
+  filePointer = fopen(filePath, "a+");
+  if (filePointer == NULL)
   {
-    perror(filePath);
-    printf("Couldn't open file.\n");
-    exit(0);
+    printf("Couldn't open file: %d\n", errno);
+    perror("fopen Error: \n");
+    exit(1);
   }
 
-  int byte_ret = fprintf(fd, "%s %f %f %f %f\n", (char *)(mark->student_index),
-                         mark->assgnmt01_marks,
-                         mark->assgnmt02_marks,
-                         mark->project_marks,
-                         mark->finalExam_marks);
+  int write_ret = fwrite(&mark, sizeof(Marks), 1, filePointer);
 
-  if (byte_ret == -1)
+  if (write_ret < 0)
   {
-    perror(filePath);
-    printf("Couldn't write .\n");
-    exit(0);
+    printf("Error No: %d\n", errno);
+    perror("fwrite Error: ");
+    exit(1);
   }
-  fclose(fd);
-  addedStudents++;
+
+  fclose(filePointer);
 }
 
-Marks *createMarks(char (*index)[12], float a1, float a2, float project, float exam)
+void updateFile(Marks mark)
 {
-  Marks *m = malloc(sizeof(Marks));
-
-  m->student_index = index;
-  m->assgnmt01_marks = a1;
-  m->assgnmt02_marks = a2;
-  m->project_marks = project;
-  m->finalExam_marks = exam;
-
-  return m;
-};
-
-void updateFile(Marks *mark)
-{
-  FILE *fp = fopen(filePath, "wb+");
-  char(*buf)[12];
-
-  if (fp == NULL)
-  {
-    perror(filePath);
-    printf("Couldn't open file");
-    exit(0);
-  }
-
-  while (1)
-  {
-    int read_ret = fscanf(fp, "%s", (char *)buf);
-    if (read_ret == -1)
-    {
-      perror(filePath);
-      printf("Couldn't open file");
-      exit(0);
-    }
-
-    if (strcmp((char *)buf, (char *)(mark->student_index)))
-    {
-      int byte_ret = fprintf(fp, "%s %f %f %f %f\n", (char *)(mark->student_index),
-                             mark->assgnmt01_marks,
-                             mark->assgnmt02_marks,
-                             mark->project_marks,
-                             mark->finalExam_marks);
-
-      if (byte_ret == -1)
-      {
-        perror(filePath);
-        printf("Error writing to the file");
-        exit(0);
-      }
-      break;
-    }
-    else if (read_ret == EOF)
-    {
-      printf("Index Number Not Found \n");
-    }
-  }
 }
 
 void deleteMark(char index[12])
 {
-  FILE *fp = fopen(filePath, "w");
-  char(*buf)[12];
-
-  if (fp == NULL)
-  {
-    perror(filePath);
-    printf("Couldn't open file");
-    exit(0);
-  }
-
-  while (1)
-  {
-    int read_ret = fscanf(fp, "%s", (char *)buf);
-    if (read_ret == -1)
-    {
-      perror(filePath);
-      printf("Couldn't read from file");
-      exit(0);
-    }
-
-    if (strcmp((char *)buf, (char *)(index)))
-    {
-
-      break;
-    }
-    else if (read_ret == EOF)
-    {
-      printf("Index Number Not Found \n");
-    }
-  }
 }
