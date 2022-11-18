@@ -12,6 +12,7 @@ int mainMenu();
 void createStudentRecord();
 void updateMenu();
 void deleteMenu();
+void readMarks();
 void navigate();
 void addToFile(Marks mark);
 void updateFile(Marks mark);
@@ -22,6 +23,7 @@ Marks *createMarks(char (*index)[12], float a1, float a2, float project, float e
 int addedStudents = 0;
 
 char filePath[] = "./data/marks.dat";
+char tempFilePath[] = "./data/copy.dat";
 char dummyFilePath[] = "./Files/dummyMarks.dat";
 
 int main()
@@ -58,6 +60,11 @@ void navigate()
       optionSelected = 1;
       break;
 
+    case 4:
+      readMarks();
+      optionSelected = 1;
+      break;
+
     default:
       printf("Invalid option. Try Again\n");
       break;
@@ -71,6 +78,7 @@ int mainMenu()
   printf("1. Add Student Marks Entry\n");
   printf("2. Update Student Marks\n");
   printf("3. Delete Student Marks\n");
+  printf("4. View data records\n");
 
   int selected;
 
@@ -117,6 +125,10 @@ void updateMenu()
   scanf("%f", &updateEntry.project_marks);
   printf("Enter updated final exam marks: ");
   scanf("%f", &updateEntry.finalExam_marks);
+
+  updateFile(updateEntry);
+
+  navigate();
 }
 
 void deleteMenu()
@@ -128,6 +140,8 @@ void deleteMenu()
   scanf("%s", index);
 
   deleteMark(index);
+
+  navigate();
 }
 
 void addToFile(Marks mark)
@@ -154,10 +168,162 @@ void addToFile(Marks mark)
   fclose(filePointer);
 }
 
-void updateFile(Marks mark)
+void updateFile(Marks updatedMark)
 {
+  FILE *file, *copy;
+  Marks mark;
+
+  file = fopen(filePath, "r+");
+  if (file == NULL)
+  {
+    printf("Error No: %d\n", errno);
+    perror("fopen Error: ");
+    exit(1);
+  }
+
+  copy = fopen(tempFilePath, "a+");
+  if (file == NULL)
+  {
+    printf("Error No: %d\n", errno);
+    perror("fopen Error: ");
+    exit(1);
+  }
+
+  while (fread(&mark, sizeof(Marks), 1, file))
+  {
+    if (strcmp(mark.student_index, updatedMark.student_index) == 0)
+    {
+      int write_ret = fwrite(&updatedMark, sizeof(Marks), 1, copy);
+      if (write_ret < 0)
+      {
+        printf("Error No: %d\n", errno);
+        perror("fwrite Error: ");
+        exit(1);
+      }
+    }
+    else
+    {
+      int write_ret = fwrite(&mark, sizeof(Marks), 1, copy);
+      if (write_ret < 0)
+      {
+        printf("Error No: %d\n", errno);
+        perror("fwrite Error: ");
+        exit(1);
+      }
+    }
+  }
+
+  fclose(file);
+
+  file = fopen(filePath, "w+");
+  if (file == NULL)
+  {
+    printf("Error No: %d\n", errno);
+    perror("fopen Error: ");
+    exit(1);
+  }
+
+  while (fread(&mark, sizeof(Marks), 1, copy))
+  {
+    int write_ret = fwrite(&mark, sizeof(Marks), 1, file);
+    if (write_ret < 0)
+    {
+      printf("Error No: %d\n", errno);
+      perror("fwrite Error: ");
+      exit(1);
+    }
+  }
+
+  fclose(file);
+  fclose(copy);
 }
 
 void deleteMark(char index[12])
 {
+  FILE *file, *copy;
+  Marks mark;
+
+  file = fopen(filePath, "r+");
+  if (file == NULL)
+  {
+    printf("Error No: %d\n", errno);
+    perror("fopen Error: ");
+    exit(1);
+  }
+
+  copy = fopen(tempFilePath, "a+");
+  if (file == NULL)
+  {
+    printf("Error No: %d\n", errno);
+    perror("fopen Error: ");
+    exit(1);
+  }
+
+  while (fread(&mark, sizeof(Marks), 1, file))
+  {
+    if (strcmp(mark.student_index, index) != 0)
+    {
+      int write_ret = fwrite(&mark, sizeof(Marks), 1, copy);
+      if (write_ret < 0)
+      {
+        printf("Error No: %d\n", errno);
+        perror("fwrite Error: ");
+        exit(1);
+      }
+    }
+  }
+
+  fclose(file);
+
+  file = fopen(filePath, "w+");
+  if (file == NULL)
+  {
+    printf("Error No: %d\n", errno);
+    perror("fopen Error: ");
+    exit(1);
+  }
+
+  while (fread(&mark, sizeof(Marks), 1, copy))
+  {
+    int write_ret = fwrite(&mark, sizeof(Marks), 1, file);
+    if (write_ret < 0)
+    {
+      printf("Error No: %d\n", errno);
+      perror("fwrite Error: ");
+      exit(1);
+    }
+  }
+
+  fclose(file);
+  fclose(copy);
+}
+
+void readMarks()
+{
+  FILE *infile;
+  Marks input;
+
+  // Open person.dat for reading
+  infile = fopen(filePath, "r");
+  if (infile == NULL)
+  {
+    fprintf(stderr, "\nError opening file\n");
+    exit(1);
+  }
+
+  // read file contents till end of file
+  while (fread(&input, sizeof(Marks), 1, infile))
+  {
+    printf("%s | %f | %f | %f | %f\n",
+           input.student_index,
+           input.assgnmt01_marks,
+           input.assgnmt02_marks,
+           input.project_marks,
+           input.finalExam_marks);
+  }
+
+  // close file
+  fclose(infile);
+
+  navigate();
 }
