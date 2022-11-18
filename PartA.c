@@ -101,7 +101,7 @@ void createStudentRecord()
   scanf("%f", &markEntry.assgnmt01_marks);
   printf("Enter assignment 2 marks: ");
   scanf("%f", &markEntry.assgnmt02_marks);
-  printf("Enter assignment project marks: ");
+  printf("Enter project marks: ");
   scanf("%f", &markEntry.project_marks);
   printf("Enter final exam marks: ");
   scanf("%f", &markEntry.finalExam_marks);
@@ -122,7 +122,7 @@ void updateMenu()
   scanf("%f", &updateEntry.assgnmt01_marks);
   printf("Enter updated assignment 2 marks: ");
   scanf("%f", &updateEntry.assgnmt02_marks);
-  printf("Enter updated assignment project marks: ");
+  printf("Enter updated project marks: ");
   scanf("%f", &updateEntry.project_marks);
   printf("Enter updated final exam marks: ");
   scanf("%f", &updateEntry.finalExam_marks);
@@ -169,6 +169,7 @@ void addToFile(Marks mark)
   }
 
   fclose(filePointer);
+  addedStudents++;
 }
 
 // Update a file
